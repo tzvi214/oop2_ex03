@@ -17,15 +17,26 @@ FunctionCalculator::FunctionCalculator(std::istream& istr, std::ostream& ostr)
 }
 
 
-void FunctionCalculator::run()
+void FunctionCalculator::run()//iostream
 {
+    //ask user num of function
+
     do
     {
         m_ostr << '\n';
         printOperations();
         m_ostr << "Enter command ('help' for the list of available commands): ";
-        const auto action = readAction();
-        runAction(action);
+        try {
+             readLine();
+             const auto action = readAction();
+             runAction(action);
+    }
+        catch(const InputException& exception){
+              //...
+           std:: cout <<  exception.what();
+
+         }
+        //m_redingFromFile
     } while (m_running);
 }
 
@@ -37,17 +48,20 @@ void FunctionCalculator::eval()
         const auto& operation = m_operations[*index];
 		int inputCount = operation->inputCount();
         int size = 0;
-        m_istr >> size;
+       // m_istr >> size;
+        m_iss >> size;//i need to check that is really number
 		auto matrixVec = std::vector<Operation::T>();
         if (inputCount > 1)
             m_ostr << "\nPlease enter " << inputCount << " matrices:\n";
 
-		for (int i = 0; i < inputCount; ++i)
+		for (int i = 0; i < inputCount; ++i)// in this for he creating the input matrix he first creating the matrix and than he puts the values in the matrix. i need to changhed it 
 		{
-            auto input = Operation::T(size);
+            auto input = Operation::T(size);// he first creating the matrix here. and than puts values  but why ??
             m_ostr << "\nEnter a " << size << "x" << size << " matrix:\n";
-            m_istr >> input;
-			matrixVec.push_back(input);
+           // m_istr >> input;
+            readInput();
+            m_iss >> input;
+			matrixVec.push_back(input);//
 
 		}
         m_ostr << "\n";
@@ -86,6 +100,7 @@ void FunctionCalculator::exit()
 
 void FunctionCalculator::printOperations() const
 {
+    //to add nunber of legal operation
     m_ostr << "List of available matrix operations:\n";
     for (decltype(m_operations.size()) i = 0; i < m_operations.size(); ++i)
     {
@@ -97,32 +112,36 @@ void FunctionCalculator::printOperations() const
 }
 
 
-std::optional<int> FunctionCalculator::readOperationIndex() const
+std::optional<int> FunctionCalculator::readOperationIndex() 
 {
-    //to do eception
     int i = 0;
-    m_istr >> i;// i need to check that is legal input (that is int)
-    if (i >= static_cast<int>(m_operations.size()))
+    m_iss >> i;
+   // if (!isdigit(i)) throw InputException("You didnt Enter digit in  ");
+    if (i >= static_cast<int>(m_operations.size()) )
     {
-        m_ostr << "Operation #" << i << " doesn't exist\n";
+      //m_ostr << "Operation #" << i << " doesn't exist\n";
+        throw InputException("Operation #" + std::to_string(i) +"doesn't exist\n");
         return {};
     }
     return i;
 }
 
 
-FunctionCalculator::Action FunctionCalculator::readAction() const
+FunctionCalculator::Action FunctionCalculator::readAction() 
 {
     auto action = std::string();
-    m_istr >> action;
+   // m_istr >> action;
+	m_iss >> action;
 
     const auto i = std::ranges::find(m_actions, action, &ActionDetails::command);
     if (i != m_actions.end())
     {
         return i->action;
     }
+     
 
-    return Action::Invalid;// or exeption
+     throw InputException("number outside the range of the operation vector (Unknown operation)\n");
+  //return Action::Invalid;
 }
 
 
@@ -134,7 +153,7 @@ void FunctionCalculator::runAction(Action action)
             m_ostr << "Unknown enum entry used!\n";
             break;
 
-        case Action::Invalid:// maybe i need to throw exapcetion and to cath it heere
+        case Action::Invalid:
             m_ostr << "Command not found\n";
             break;
 
@@ -145,9 +164,12 @@ void FunctionCalculator::runAction(Action action)
         case Action::Del:          del();                      break;
         case Action::Help:         help();                     break;
         case Action::Exit:         exit();                     break;
-        //case Action::Iden:          unaryFunc<Identity>();      break;
-        //case Action::Tran:          unaryFunc<Transpose>();      break;
+        case Action::Iden:          unaryFunc<Identity>();      break;
+        case Action::Tran:          unaryFunc<Transpose>();      break;
         case Action::Scal:          unaryWithIntFunc<Scalar>();      break;
+          //  m_redingFromFile    /// read() 
+          //}
+            // resize
     }
 }
 
@@ -212,4 +234,33 @@ FunctionCalculator::OperationList FunctionCalculator::createOperations() const
         std::make_shared<Identity>(),
         std::make_shared<Transpose>(),
     };
+}
+//--------------------------------------------
+void FunctionCalculator::readLine()
+{
+    m_line.clear();// clear the string for ald things
+    if (m_readingFromFile) {
+        if (!std::getline(m_file, m_line)) {
+          
+			// maby to close the file
+        }
+    }
+    else {
+        if (!std::getline(std::cin, m_line)) {
+			//maybe to throw exception
+        }
+    }
+
+    m_iss.clear();         // îàôñ îöáéí ÷åãîéí
+    m_iss.str(m_line);     // èåòï àú äùåøä äðåëçéú ìÎistringstream
+}
+//-----------------------------------
+void FunctionCalculator::readInput()
+{
+    if (!(m_iss.eof() || (m_iss >> std::ws).eof())) {
+        // maybe the exception will be here
+    }
+
+    readLine();
+    
 }

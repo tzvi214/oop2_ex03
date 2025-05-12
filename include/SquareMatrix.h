@@ -2,7 +2,10 @@
 
 #include <vector>
 #include <iostream>
-
+#include "InputException.h"
+const int MAX_ALLOWED_VALUE = 1024;
+const int MIN_ALLOWED_VALU = -1024;
+const int MAX_MAT_SIZE = 5;
 
 template <typename T>
 class SquareMatrix
@@ -16,7 +19,7 @@ public:
 	//SquareMatrix(const std::vector<std::vector<T>>& matrix);
 	//SquareMatrix(std::vector<std::vector<T>>&& matrix);
 	SquareMatrix(int size, const T& value);
-	SquareMatrix(int size);
+	SquareMatrix(int size);// i don't know why he did this strange c-tor !!!!!
 	int size() const
 	{
 		return m_size;
@@ -35,6 +38,9 @@ public:
 	//bool operator!=(const SquareMatrix& rhs) const;
 	SquareMatrix Transpose() const;
 	//void print(std::ostream& ostr) const;
+
+	bool isValueValid(T) const;
+
 private:
 	int m_size;
 	std::vector<std::vector<T>> m_matrix;
@@ -65,13 +71,18 @@ inline std::ostream& operator<<(std::ostream& ostr, const SquareMatrix<int>& mat
 	return ostr;
 }
 
-inline std::istream& operator>>(std::istream& istr, SquareMatrix<int>& matrix)
+inline std::istream& operator>>(std::istream& istr, SquareMatrix<int>& matrix)// mayby the input will be from file, if yes that will be good ?? 
 {
 	for (int i = 0; i < matrix.size(); ++i)
 	{
 		for (int j = 0; j < matrix.size(); ++j)
 		{
-			istr >> matrix(i, j);
+			int val;
+			istr >> val;
+			if (matrix.isValueValid(val))
+				matrix(i, j) = val;
+	/*	  istr >> matrix(i, j);*/
+
 		}
 	}
 	return istr;
@@ -81,8 +92,10 @@ inline std::istream& operator>>(std::istream& istr, SquareMatrix<int>& matrix)
 // the relevant function
 template <typename T>
 SquareMatrix<T>::SquareMatrix(int size, const T& value)
-	: m_size(size), m_matrix(size, std::vector<T>(size, value))
+	: m_size(size), m_matrix(size, std::vector<T>(size, value))//to check the valu of size and itch valu in the vector
 {
+	if()
+
 	for (int i = 0; i < size * size; ++i)
 	{
 		m_matrix[i / size][i % size] = value;
@@ -102,42 +115,49 @@ SquareMatrix<T>::SquareMatrix(int size)
 template <typename T>
 SquareMatrix<T> SquareMatrix<T>::operator+(const SquareMatrix& rhs) const
 {
-	SquareMatrix result(*this);
-	return result += rhs;
+	SquareMatrix result(m_size); // יצירת מטריצה בגודל נכון
+
+	for (int i = 0; i < m_size; ++i)
+	{
+		for (int j = 0; j < m_size; ++j)
+		{
+			T sum = m_matrix[i][j] + rhs.m_matrix[i][j];
+			if (isValueValid(sum))
+				result(i, j) = sum;
+		}
+	}
+	return result;
 }
 
 
 template <typename T>
 SquareMatrix<T> SquareMatrix<T>::operator-(const SquareMatrix& rhs) const
 {
-	SquareMatrix result(*this);
-	return result -= rhs;
+	SquareMatrix result(m_size); // יצירת מטריצה בגודל נכון
+
+	for (int i = 0; i < m_size; ++i)
+	{
+		for (int j = 0; j < m_size; ++j)
+		{
+			T sum = m_matrix[i][j] - rhs.m_matrix[i][j];
+			if (isValueValid(sum))
+				result(i, j) = sum;
+		}
+	}
+	return result;
 }
 
 template <typename T>
 SquareMatrix<T>& SquareMatrix<T>::operator+=(const SquareMatrix& rhs)
 {
-	for (int i = 0; i < m_size; ++i)
-	{
-		for (int j = 0; j < m_size; ++j)
-		{
-			m_matrix[i][j] += rhs.m_matrix[i][j];
-		}
-	}
-	return *this;
+	return *this = *this + rhs;
 }
 
 template <typename T>
 SquareMatrix<T>& SquareMatrix<T>::operator-=(const SquareMatrix& rhs)
 {
-	for (int i = 0; i < m_size; ++i)
-	{
-		for (int j = 0; j < m_size; ++j)
-		{
-			m_matrix[i][j] -= rhs.m_matrix[i][j];
-		}
-	}
-	return *this;
+	
+	return *this = *this - rhs;
 }
 
 template <typename T>
@@ -153,6 +173,8 @@ SquareMatrix<T> SquareMatrix<T>::Transpose() const
 	}
 	return result;
 }
+
+
 template <typename T>
 SquareMatrix<T> SquareMatrix<T>::operator*(const T& scalar) const
 {
@@ -161,8 +183,20 @@ SquareMatrix<T> SquareMatrix<T>::operator*(const T& scalar) const
 	{
 		for (int j = 0; j < m_size; ++j)
 		{
-			result(i, j) *= scalar;
+			T sum = m_matrix[i][j] * scalar;
+			if(isValueValid(sum))
+			result(i, j) = sum;
 		}
 	}
 	return result;
+}
+
+template<typename T>
+inline bool SquareMatrix<T>::isValueValid(T val) const
+{
+	if (val > MIN_ALLOWED_VALU && val < MAX_ALLOWED_VALUE)
+		return true;
+	else
+		throw InputException("the value: " + std::to_string(val) + " ,is invalid value");
+
 }

@@ -9,7 +9,7 @@
 class Scalar : public UnaryOperation
 {
 public:
-    Scalar(int scalar);
+    Scalar(int scalar);// to check if scalar < MAX_SCAL_SIZE
     T compute(const std::vector<T>& input) const override;
     void print(std::ostream& ostr, bool first_print = false) const override;
 
