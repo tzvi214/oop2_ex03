@@ -1,12 +1,12 @@
 #include "Scalar.h"
 
 #include <iostream>
-#include "InputException.h"
+#include "FileException.h"
 
 Scalar::Scalar(int scalar)
  : m_scalar(scalar)
 {
-    if (m_scalar > 5 || m_scalar <= 0) throw InputException("scal nat in the range");
+    if (m_scalar > 5 || m_scalar <= 0) throw FileException("scal nat in the range");
 }
 
 
