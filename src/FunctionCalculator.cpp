@@ -36,8 +36,8 @@ void FunctionCalculator::run(std::istream& istr)
     printOperations();
     while (m_running && std::getline(istr, line))
     {
-        if (line.find_first_not_of(" \t\r\n") == std::string::npos)
-            continue;
+        /*if (line.find_first_not_of(" \t\r\n") == std::string::npos)
+            continue;*/
         iss = std::istringstream(line);
        // iss.str(line);
 
@@ -111,8 +111,13 @@ void FunctionCalculator::eval(std::istringstream& iss, std::istream& istr)
             istr >> input;
             matrixVec.push_back(input);
         }
-       /* istr.clear();
-        istr.ignore(std::numeric_limits<std::streamsize>::max(), '\n');*/
+         if (hasNonWhitespace(iss)) {
+           iss.clear();
+           iss.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+           throw FileException("Too many arguments for this command");
+       }
+        istr.clear();
+        istr.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
         m_ostr << "\n";
         operation->print(m_ostr, matrixVec);
@@ -184,8 +189,8 @@ void FunctionCalculator::resize(std::istream& istr)
             m_ostr << "Excess operations deleted.\n";
         }
     }
-   /* istr.clear();
-    istr.ignore(std::numeric_limits<std::streamsize>::max(), '\n');*/
+    istr.clear();
+    istr.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 }
 
 void FunctionCalculator::printOperations() const
