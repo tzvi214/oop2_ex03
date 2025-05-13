@@ -74,6 +74,7 @@ void FunctionCalculator::eval(std::istringstream& iss, std::istream& istr)
 
         for (int i = 0; i < inputCount; ++i)
         {
+
             auto input = Operation::T(size); // Operation::T == SquareMatrix<int>
             m_ostr << "\nEnter a " << size << "x" << size << " matrix:\n";
             istr >> input;
