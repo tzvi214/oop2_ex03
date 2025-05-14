@@ -18,7 +18,7 @@ class FunctionCalculator
 public:
     FunctionCalculator(std::ostream& ostr);
     void run();
-    void run(std::istream& istr);
+    void run(std::istream& istr, bool);
 
 private:
     void eval(std::istringstream&, std::istream&);
@@ -33,13 +33,21 @@ private:
     {
         if (auto f0 = readOperationIndex(iss), f1 = readOperationIndex(iss); f0 && f1)
         {
+            if (hasNonWhitespace(iss)) {
+                iss.clear();
+                iss.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                throw std::runtime_error("Invalid input: To match argumant");
+            }
+          
             addOperation(std::make_shared<FuncType>(m_operations[*f0], m_operations[*f1]));
         }
+       
     }
 
     template <typename FuncType>
     void unaryFunc()
     {
+
         addOperation(std::make_shared<FuncType>());
     }
 
@@ -52,6 +60,13 @@ private:
         {
             throw std::runtime_error("Invalid input: expected an integer.");
         }
+
+        if (hasNonWhitespace(iss)) {
+            iss.clear();
+            iss.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            throw std::runtime_error("Invalid input: To match argumant");
+        }
+
         addOperation(std::make_shared<FuncType>(i));
     }
 
@@ -110,4 +125,5 @@ private:
     bool hasNonWhitespace(std::istringstream&);
     void updateMaxFunc();
     void addOperation(std::shared_ptr<Operation>);
+    void checkIfEmptyLine(std::istringstream&);
 };

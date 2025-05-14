@@ -21,12 +21,12 @@ FunctionCalculator::FunctionCalculator(std::ostream& ostr)
 void FunctionCalculator::run()
 {
     updateMaxFunc();
-    run(std::cin);
+    run(std::cin, false);
 }
 
-void FunctionCalculator::run(std::istream& istr)
+void FunctionCalculator::run(std::istream& istr, bool fileM)
 {
-
+    bool fileMode = fileM;
 
     auto line = std::string();
     auto iss = std::istringstream();
@@ -36,11 +36,8 @@ void FunctionCalculator::run(std::istream& istr)
     printOperations();
     while (m_running && std::getline(istr, line))
     {
-        /*if (line.find_first_not_of(" \t\r\n") == std::string::npos)
-            continue;*/
+        
         iss = std::istringstream(line);
-       // iss.str(line);
-
 
         try {
             const auto action = readAction(iss);
@@ -51,6 +48,7 @@ void FunctionCalculator::run(std::istream& istr)
                 iss.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
                 throw FileException("Too many arguments for this command");
             }
+           // checkIfEmptyLine(iss);
          
         }
         
@@ -58,21 +56,31 @@ void FunctionCalculator::run(std::istream& istr)
         catch (const FileException& e)
         {
             m_ostr << e.what();
+            //----------------
+            if (fileMode) {
+                char choice;
+                std::cout << " \n in the line : " <<   line    <<" \nEnter Y to continue\n";
+                std::cin >> choice;
+                std::cin.clear();
+                std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                if (choice == 'y' || choice == 'Y') {
+                   
+                    continue;
+                }
+                else
+                    return; 
+            }
+  
         }
 
-        catch (const std::exception& e)// for Unexpectederor from the sreams
+        catch (const std::exception& e)// 
         {
             m_ostr << "Unexpected error: " << e.what();
         }
 
 
         printOperations();
-      //  iss.clear();
-
-       /* if (istr.fail()) {
-            istr.clear();
-            istr.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-        }*/
+      
         //to clean the line itch time
         iss.clear();
         iss.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
@@ -93,11 +101,11 @@ void FunctionCalculator::eval(std::istringstream& iss, std::istream& istr)
 			throw FileException("Invalid input. Please enter a number.");
 		}
 
-       /* if (hasNonWhitespace(iss)) {
+        if (hasNonWhitespace(iss)) {
             iss.clear();
             iss.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
             throw FileException("Too many arguments for this command");
-        }*/
+        }
 
         auto matrixVec = std::vector<Operation::T>();
         if (inputCount > 1)
@@ -111,9 +119,10 @@ void FunctionCalculator::eval(std::istringstream& iss, std::istream& istr)
             istr >> input;
             matrixVec.push_back(input);
         }
-         if (hasNonWhitespace(iss)) {
-           iss.clear();
-           iss.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        // i am chainghing it
+         if (!(istr.eof() || (istr >> std::ws).eof())) {
+             istr.clear();
+             istr.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
            throw FileException("Too many arguments for this command");
        }
         istr.clear();
@@ -127,15 +136,20 @@ void FunctionCalculator::eval(std::istringstream& iss, std::istream& istr)
 
 void FunctionCalculator::del(std::istringstream& iss)
 {
-    // update the number of operations are leagelly -- ??? 
     if (auto i = readOperationIndex(iss); i)
     {
+        if (hasNonWhitespace(iss)) {
+            iss.clear();
+            iss.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            throw FileException("Too many arguments for this command");
+        }
         m_operations.erase(m_operations.begin() + *i);
     }
 }
 
 void FunctionCalculator::help()
 {
+    
     m_ostr << "The available commands are:\n";
     for (const auto& action : m_actions)
     {
@@ -157,9 +171,9 @@ void FunctionCalculator::read(std::istringstream& iss)
     iss >> file_path;
     file.open(file_path);
     if (!file.is_open()) {
-        throw FileException("File not found. \n path: " + file_path); // WARNING NOT CATCHING!!!
+        throw FileException("File not found. \n path: " + file_path); 
     }
-    run(file);
+    run(file, true);
 }
 
 void FunctionCalculator::resize(std::istream& istr)
@@ -186,9 +200,13 @@ void FunctionCalculator::resize(std::istream& istr)
         if (choice == 'y' || choice == 'Y')
         {
             m_operations.resize(newMaxOperation);
+            m_maxOperation = newMaxOperation;
             m_ostr << "Excess operations deleted.\n";
         }
     }
+    else
+    m_maxOperation = newMaxOperation;
+
     istr.clear();
     istr.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 }
@@ -204,6 +222,7 @@ void FunctionCalculator::printOperations() const
         m_operations[i]->print(m_ostr, true);
         m_ostr << '\n';
     }
+    m_ostr << "\nThe Maximum allowed operation is :" << m_maxOperation << std::endl;
     m_ostr << "\n Enter command ('help' for the list of available commands): ";
 }
 
@@ -385,4 +404,13 @@ void  FunctionCalculator::addOperation(std::shared_ptr<Operation> op)
     }
 
     m_operations.push_back(std::move(op));
+}
+
+void FunctionCalculator::checkIfEmptyLine(std::istringstream& iss)
+{
+    if (hasNonWhitespace(iss)) {
+        iss.clear();
+        iss.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        throw FileException("Too many arguments for this command");
+    }
 }

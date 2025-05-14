@@ -6,7 +6,8 @@
 Scalar::Scalar(int scalar)
  : m_scalar(scalar)
 {
-    if (m_scalar > 5 || m_scalar <= 0) throw FileException("scal nat in the range");
+    // scal can by avry size
+   // if (m_scalar > 5 || m_scalar <= 0) throw FileException("scal nat in the range");
 }
 
 

@@ -80,12 +80,20 @@ for (int i = 0; i < matrix.size(); ++i)
 	{
 		int val;
 		istr >> val;
+		if (istr.fail()) // fail in the input
+		{
+			istr.clear();
+			istr.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+			throw FileException("Invalid input: expected an integer value.");
+		}
+
 
 		matrix.checkVal(val);
 		matrix(i, j) = val;
 	}
 }
-return istr;
+    
+   return istr;
 }
 
 // Implementation must be in .h file for the compiler to see it and instantiate
@@ -196,7 +204,7 @@ SquareMatrix<T> SquareMatrix<T>::operator*(const T& scalar) const
 template<typename T>
 inline void SquareMatrix<T>::checkVal(T val) const {
 	if (val <= MIN_ALLOWED_VALU || val >= MAX_ALLOWED_VALUE)
-		throw FileException("the value: " + std::to_string(val) + " ,is invalid value");
+		throw FileException("the value: " + std::to_string(val) + " ,is invalid value for SquareMatrix");
 }
 
 template<typename T>
