@@ -5,10 +5,7 @@
 
 Scalar::Scalar(int scalar)
  : m_scalar(scalar)
-{
-    // scal can by avry size
-   // if (m_scalar > 5 || m_scalar <= 0) throw FileException("scal nat in the range");
-}
+{ }
 
 
 Operation::T Scalar::compute(const std::vector<T>& input) const

@@ -42,13 +42,7 @@ void FunctionCalculator::run(std::istream& istr, bool fileM)
         try {
             const auto action = readAction(iss);
             runAction(action, iss, istr);
-            //if the line still nat emtay
-            if (hasNonWhitespace(iss)) {
-                iss.clear();
-                iss.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-                throw FileException("Too many arguments for this command");
-            }
-           // checkIfEmptyLine(iss);
+            checkIfEmptyLine(iss);
          
         }
         
@@ -56,7 +50,7 @@ void FunctionCalculator::run(std::istream& istr, bool fileM)
         catch (const FileException& e)
         {
             m_ostr << e.what();
-            //----------------
+            // if its from file i nedd to sow the line input
             if (fileMode) {
                 char choice;
                 std::cout << " \n in the line : " <<   line    <<" \nEnter Y to continue\n";
@@ -73,7 +67,7 @@ void FunctionCalculator::run(std::istream& istr, bool fileM)
   
         }
 
-        catch (const std::exception& e)// 
+        catch (const std::exception& e)
         {
             m_ostr << "Unexpected error: " << e.what();
         }
@@ -101,12 +95,7 @@ void FunctionCalculator::eval(std::istringstream& iss, std::istream& istr)
 			throw FileException("Invalid input. Please enter a number.");
 		}
 
-        if (hasNonWhitespace(iss)) {
-            iss.clear();
-            iss.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-            throw FileException("Too many arguments for this command");
-        }
-
+        checkIfEmptyLine(iss);
         auto matrixVec = std::vector<Operation::T>();
         if (inputCount > 1)
             m_ostr << "\nPlease enter " << inputCount << " matrices:\n";
@@ -138,11 +127,7 @@ void FunctionCalculator::del(std::istringstream& iss)
 {
     if (auto i = readOperationIndex(iss); i)
     {
-        if (hasNonWhitespace(iss)) {
-            iss.clear();
-            iss.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-            throw FileException("Too many arguments for this command");
-        }
+        checkIfEmptyLine(iss);
         m_operations.erase(m_operations.begin() + *i);
     }
 }
@@ -173,6 +158,8 @@ void FunctionCalculator::read(std::istringstream& iss)
     if (!file.is_open()) {
         throw FileException("File not found. \n path: " + file_path); 
     }
+  //  checkIfEmptyLine(iss);
+
     run(file, true);
 }
 
@@ -236,7 +223,7 @@ std::optional<int> FunctionCalculator::readOperationIndex(std::istringstream& is
     {
         iss.clear();
         iss.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-        throw FileException("must enter numbers, not characters.");
+        throw FileException("must enter numbers, ");
     }
 
     // if i out of range the vector operation : -> throw
