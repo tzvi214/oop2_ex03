@@ -164,15 +164,15 @@ void FunctionCalculator::read(std::istringstream& iss)
     run(file, true);
 }
 
-void FunctionCalculator::resize(std::istream& istr)
+void FunctionCalculator::resize(std::istringstream& iss, std::istream& istr)
 {
-    m_ostr << "Enter the new maximum number of operations (between 2 and 100): \n";
+   // m_ostr << "Enter the new maximum number of operations (between 2 and 100): \n";
     int newMaxOperation = 0;
-    istr >> newMaxOperation;
-    if (istr.fail())
+    iss >> newMaxOperation;
+    if (iss.fail())
     {
-        istr.clear();
-        istr.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        iss.clear();
+        iss.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         throw FileException("Invalid input. Please enter a number.");
     }
     if (newMaxOperation < 2 || newMaxOperation > 100)
@@ -191,12 +191,13 @@ void FunctionCalculator::resize(std::istream& istr)
             m_maxOperation = newMaxOperation;
             m_ostr << "Excess operations deleted.\n";
         }
+        istr.clear();
+        istr.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     }
     else
     m_maxOperation = newMaxOperation;
 
-    istr.clear();
-    istr.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    checkIfEmptyLine(iss);
 }
 
 void FunctionCalculator::printOperations() const
@@ -275,7 +276,7 @@ void FunctionCalculator::runAction(Action action, std::istringstream& iss, std::
     case Action::Tran:     unaryFunc<Transpose>();          break;
     case Action::Scal:     unaryWithIntFunc<Scalar>(iss);   break;
     case Action::Read:     read(iss);                       break;
-    case Action::Resize:   resize(istr);                    break;
+    case Action::Resize:   resize(iss, istr);                    break;
     }
 }
 

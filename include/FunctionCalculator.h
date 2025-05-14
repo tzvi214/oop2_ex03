@@ -26,7 +26,7 @@ private:
     void help(std::istringstream& iss);
     void exit(std::istringstream& iss);
     void read(std::istringstream&);
-    void resize(std::istream&);
+    void resize(std::istringstream& iss, std::istream& istr);
 
     template <typename FuncType>
     void binaryFunc(std::istringstream& iss)
