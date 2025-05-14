@@ -159,7 +159,7 @@ void FunctionCalculator::read(std::istringstream& iss)
     if (!file.is_open()) {
         throw FileException("File not found. \n path: " + file_path); 
     }
-  //  checkIfEmptyLine(iss);
+    checkIfEmptyLine(iss);
 
     run(file, true);
 }
@@ -402,3 +402,4 @@ void FunctionCalculator::checkIfEmptyLine(std::istringstream& iss)
         throw FileException("Too many arguments for this command");
     }
 }
+
