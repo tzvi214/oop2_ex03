@@ -23,8 +23,8 @@ public:
 private:
     void eval(std::istringstream&, std::istream&);
     void del(std::istringstream&);
-    void help();
-    void exit();
+    void help(std::istringstream& iss);
+    void exit(std::istringstream& iss);
     void read(std::istringstream&);
     void resize(std::istream&);
 

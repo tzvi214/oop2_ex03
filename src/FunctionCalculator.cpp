@@ -69,7 +69,7 @@ void FunctionCalculator::run(std::istream& istr, bool fileM)
 
         catch (const std::exception& e)
         {
-            m_ostr << "Unexpected error: " << e.what();
+            m_ostr <<  e.what();
         }
 
 
@@ -108,12 +108,12 @@ void FunctionCalculator::eval(std::istringstream& iss, std::istream& istr)
             istr >> input;
             matrixVec.push_back(input);
         }
-        // i am chainghing it
-         if (!(istr.eof() || (istr >> std::ws).eof())) {
+        // if the sream nat ampty after the input
+        /* if (!(istr.eof() || (istr >> std::ws).eof())) {
              istr.clear();
              istr.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
            throw FileException("Too many arguments for this command");
-       }
+       }*/
         istr.clear();
         istr.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
@@ -132,9 +132,9 @@ void FunctionCalculator::del(std::istringstream& iss)
     }
 }
 
-void FunctionCalculator::help()
+void FunctionCalculator::help(std::istringstream& iss)
 {
-    
+    checkIfEmptyLine(iss);
     m_ostr << "The available commands are:\n";
     for (const auto& action : m_actions)
     {
@@ -143,8 +143,9 @@ void FunctionCalculator::help()
     m_ostr << '\n';
 }
 
-void FunctionCalculator::exit()
+void FunctionCalculator::exit(std::istringstream& iss)
 {
+    checkIfEmptyLine(iss);
     m_ostr << "Goodbye!\n";
     m_running = false;
 }
@@ -268,8 +269,8 @@ void FunctionCalculator::runAction(Action action, std::istringstream& iss, std::
     case Action::Sub:      binaryFunc<Sub>(iss);            break;
     case Action::Comp:     binaryFunc<Comp>(iss);           break;
     case Action::Del:      del(iss);                        break;
-    case Action::Help:     help();                          break;
-    case Action::Exit:     exit();                          break;
+    case Action::Help:     help(iss);                          break;
+    case Action::Exit:     exit(iss);                          break;
     case Action::Iden:     unaryFunc<Identity>();           break;
     case Action::Tran:     unaryFunc<Transpose>();          break;
     case Action::Scal:     unaryWithIntFunc<Scalar>(iss);   break;
