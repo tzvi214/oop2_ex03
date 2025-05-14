@@ -202,7 +202,6 @@ void FunctionCalculator::resize(std::istringstream& iss, std::istream& istr)
 
 void FunctionCalculator::printOperations() const
 {
-    // print number of operations are leagelly
 
     m_ostr << " \n List of available matrix operations:\n";
     for (decltype(m_operations.size()) i = 0; i < m_operations.size(); ++i)
